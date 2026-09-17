@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: universal-ai-api-hub
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: APP_NAME
+        value: Universal AI API Hub
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: universal-ai-api-hub-db
+          property: connectionString
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: AI_PROVIDER_TIMEOUT_SECONDS
+        value: "40"
+      - key: AI_HUB_MAX_UPLOAD_KB
+        value: "4096"
+      - key: HUB_API_KEY
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+databases:
+  - name: universal-ai-api-hub-db
+    plan: free
+    region: singapore
+    databaseName: universal_ai_api_hub
+    user: universal_ai_api_hub
