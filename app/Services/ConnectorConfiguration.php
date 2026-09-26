@@ -65,7 +65,7 @@ final class ConnectorConfiguration
     }
 
     /**
-     * @param array<int, array<string, mixed>> $fields
+     * @param  array<int, array<string, mixed>>  $fields
      * @return array{input: array<string, mixed>, files: array<string, UploadedFile>}
      */
     public function normalizeInput(array $fields, array $payload, array $uploadedFiles): array
@@ -87,6 +87,7 @@ final class ConnectorConfiguration
 
             if (! $hasValue && array_key_exists('default', $field) && ! $required) {
                 $input[$name] = $field['default'];
+
                 continue;
             }
 
@@ -119,6 +120,7 @@ final class ConnectorConfiguration
 
                 $files[$name] = $file;
                 $input[$name] = ['filename' => $file->getClientOriginalName(), 'mime_type' => $file->getMimeType()];
+
                 continue;
             }
 
@@ -140,6 +142,8 @@ final class ConnectorConfiguration
         if (! is_string($value)) {
             throw ValidationException::withMessages([$name => ['This field must be text.']]);
         }
+
+        $this->ensureWithinTextLimit($name, $value);
 
         return $value;
     }
@@ -171,13 +175,26 @@ final class ConnectorConfiguration
     private function jsonValue(string $name, mixed $value): mixed
     {
         if (! is_string($value)) {
+            $this->ensureWithinTextLimit($name, json_encode($value) ?: '');
+
             return $value;
         }
+
+        $this->ensureWithinTextLimit($name, $value);
 
         try {
             return json_decode($value, true, 32, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
             throw ValidationException::withMessages([$name => ['This field must contain valid JSON.']]);
+        }
+    }
+
+    private function ensureWithinTextLimit(string $name, string $value): void
+    {
+        $limit = (int) config('ai-hub.max_text_characters');
+
+        if (mb_strlen($value) > $limit) {
+            throw ValidationException::withMessages([$name => ['This field is too long. The maximum is '.number_format($limit).' characters.']]);
         }
     }
 }

@@ -1,17 +1,63 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Blocks, Plus } from 'lucide-react';
-import type { PropsWithChildren } from 'react';
-import type { Flash } from '../types';
+import { Blocks, CheckCircle2, Moon, Plus, Sun, X } from 'lucide-react';
+import { useEffect, useState, type PropsWithChildren } from 'react';
+import type { Flash, ProviderStatus } from '../types';
+
+type Theme = 'light' | 'dark';
 
 export function AppShell({ children }: PropsWithChildren) {
-    const { flash } = usePage<{ flash: Flash }>().props;
+    const { props, url } = usePage<{ flash: Flash; providerStatus: ProviderStatus[] }>();
+    const flash = props.flash;
+    const [toast, setToast] = useState<string | null>(null);
+    const [theme, setTheme] = useState<Theme>(currentTheme);
+
+    useEffect(() => {
+        setToast(flash?.success ?? null);
+        if (!flash?.success) return;
+        const timer = window.setTimeout(() => setToast(null), 4000);
+        return () => window.clearTimeout(timer);
+    }, [flash]);
+
+    const toggleTheme = () => {
+        const next: Theme = theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('theme', next); } catch { /* storage unavailable */ }
+        setTheme(next);
+    };
+
+    const onConnectors = url.startsWith('/connectors') && !url.startsWith('/connectors/create');
 
     return <div className="app-shell">
         <header className="topbar">
-            <Link href="/connectors" className="brand" aria-label="Universal AI API Hub dashboard"><span className="brand-mark"><Blocks size={18} /></span><span>Universal AI API Hub</span></Link>
-            <nav aria-label="Primary navigation"><Link href="/connectors" className="nav-link">Connectors</Link><Link href="/connectors/create" className="icon-text-button"><Plus size={16} /> Create connector</Link></nav>
+            <div className="topbar-inner">
+                <Link href="/connectors" className="brand" aria-label="Universal AI API Hub home">
+                    <span className="brand-mark"><Blocks size={17} /></span>
+                    <span>Universal AI API Hub</span>
+                    <span className="brand-tag">Beta</span>
+                </Link>
+                <nav aria-label="Primary navigation">
+                    <Link href="/connectors" className={`nav-link ${onConnectors ? 'is-active' : ''}`} aria-current={onConnectors ? 'page' : undefined}>Connectors</Link>
+                    <button type="button" className="icon-button is-bare" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} title="Toggle theme">{theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}</button>
+                    <span className="nav-divider" aria-hidden="true" />
+                    <Link href="/connectors/create" className="button button-primary button-sm"><Plus size={15} /><span className="nav-link-label">New connector</span></Link>
+                </nav>
+            </div>
         </header>
-        {flash?.success && <div className="flash" role="status">{flash.success}</div>}
-        <main>{children}</main>
+        <main className="container">{children}</main>
+        <footer className="app-footer">
+            <div className="container">
+                <span>Universal AI API Hub · provider credentials never leave the server</span>
+                <span className="footer-status">{props.providerStatus?.map((provider) => <span key={provider.id} className={provider.configured ? 'is-ready' : 'is-missing'}><span className="status-dot" />{provider.label}</span>)}</span>
+            </div>
+        </footer>
+        {toast && <div className="toast" role="status"><span className="toast-icon"><CheckCircle2 size={18} /></span>{toast}<button type="button" className="icon-button is-bare" onClick={() => setToast(null)} aria-label="Dismiss notification"><X size={15} /></button></div>}
     </div>;
+}
+
+function currentTheme(): Theme {
+    if (typeof document === 'undefined') return 'light';
+    const explicit = document.documentElement.dataset.theme;
+    if (explicit === 'light' || explicit === 'dark') return explicit;
+
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }

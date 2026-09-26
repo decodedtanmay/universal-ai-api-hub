@@ -25,3 +25,16 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# AI coding-assistant config and planning notes (local tooling, not part of the product)
+/.agents/
+/.claude/
+/.grok/
+/.kiro/
+/.mcp.json
+/boost.json
+/AGENTS.md
+/CLAUDE.md
+/IMPLEMENTATION_ROADMAP.md
+/DEFERRED_FEATURES_BACKLOG.md
+/Universal_AI_API_Connector_Assignment.pdf

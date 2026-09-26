@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Connector;
+use App\Models\ConnectorApiKey;
 use App\Services\ConnectorPayload;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -27,6 +28,7 @@ class ConnectorController extends Controller
         return Inertia::render('Connectors/Form', [
             'connector' => null,
             'providers' => $this->providers(),
+            'existingSlugs' => Connector::query()->pluck('slug'),
         ]);
     }
 
@@ -39,7 +41,7 @@ class ConnectorController extends Controller
 
     public function show(Connector $connector): Response
     {
-        $logs = $connector->executionLogs()->latest()->get();
+        $logs = $connector->executionLogs()->with('apiKey:id,name,prefix')->latest()->get();
         $stats = [
             'total' => $logs->count(),
             'successful' => $logs->where('status', 'succeeded')->count(),
@@ -62,8 +64,12 @@ class ConnectorController extends Controller
                 'duration_ms' => $log->duration_ms,
                 'total_tokens' => $log->total_tokens,
                 'error_code' => $log->error_code,
+                'api_key' => $log->apiKey ? ['name' => $log->apiKey->name, 'prefix' => $log->apiKey->prefix] : null,
                 'created_at' => $log->created_at?->toIso8601String(),
             ])->values(),
+            'apiKeys' => $connector->apiKeys()->active()->latest()->get()
+                ->map(fn (ConnectorApiKey $key) => ConnectorApiKeyController::present($key))
+                ->values(),
         ]);
     }
 

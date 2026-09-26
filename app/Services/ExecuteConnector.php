@@ -16,8 +16,7 @@ final class ExecuteConnector
         private ConnectorConfiguration $configuration,
         private ProviderRegistry $providers,
         private OutputSchemaValidator $outputValidator,
-    ) {
-    }
+    ) {}
 
     public function run(Connector $connector, Request $request, string $source): ExecutionOutcome
     {
@@ -27,6 +26,7 @@ final class ExecuteConnector
 
         $log = ExecutionLog::create([
             'connector_id' => $connector->id,
+            'api_key_id' => $request->attributes->get('connector_api_key')?->id,
             'source' => $source,
             'status' => 'running',
             'provider' => $connector->provider,
@@ -37,7 +37,7 @@ final class ExecuteConnector
         try {
             $normalized = $this->configuration->normalizeInput(
                 $connector->input_schema,
-                $request->all(),
+                $this->payload($request),
                 $request->allFiles(),
             );
             $result = $this->providers->for($connector->provider)->generate(
@@ -70,6 +70,17 @@ final class ExecuteConnector
             $this->fail($log, $startedAt, 'INTERNAL_ERROR', 'The connector could not complete this request.');
             throw new ProviderException('The connector could not complete this request.', 'INTERNAL_ERROR', 500);
         }
+    }
+
+    /**
+     * Read only the request body, so unrelated query-string parameters (tracking tags, cache busters)
+     * are never mistaken for connector inputs.
+     *
+     * @return array<string, mixed>
+     */
+    private function payload(Request $request): array
+    {
+        return $request->isJson() ? $request->json()->all() : $request->request->all();
     }
 
     private function fail(ExecutionLog $log, int $startedAt, string $code, string $message): void

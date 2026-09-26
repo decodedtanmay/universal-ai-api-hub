@@ -35,8 +35,12 @@ services:
         value: "40"
       - key: AI_HUB_MAX_UPLOAD_KB
         value: "4096"
-      - key: HUB_API_KEY
-        generateValue: true
+      - key: AI_HUB_MAX_TEXT_CHARS
+        value: "20000"
+      - key: AI_HUB_RATE_LIMIT_PER_MINUTE
+        value: "20"
+      - key: AI_HUB_CONNECTOR_RATE_LIMIT_PER_MINUTE
+        value: "120"
       - key: GROQ_API_KEY
         sync: false
       - key: GEMINI_API_KEY

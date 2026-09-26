@@ -40,6 +40,14 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
             ],
+            'providerStatus' => fn () => collect(config('ai-hub.providers'))
+                ->map(fn (array $provider, string $id) => [
+                    'id' => $id,
+                    'label' => $provider['label'],
+                    'configured' => filled(config("services.{$id}.key")),
+                ])
+                ->values()
+                ->all(),
         ];
     }
 }

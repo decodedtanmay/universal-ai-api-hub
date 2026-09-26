@@ -24,6 +24,7 @@ class ConnectorExecutionController extends Controller
     private function execute(Request $request, Connector $connector, ExecuteConnector $executor, string $source)
     {
         try {
+            $this->ensureJsonBodyIsWellFormed($request);
             $outcome = $executor->run($connector, $request, $source);
 
             return response()->json($this->success($connector, $outcome));
@@ -43,6 +44,15 @@ class ConnectorExecutionController extends Controller
                 'data' => null,
                 'error' => ['code' => $exception->errorCode, 'message' => $exception->getMessage()],
             ], $exception->statusCode);
+        }
+    }
+
+    private function ensureJsonBodyIsWellFormed(Request $request): void
+    {
+        $body = $request->getContent();
+
+        if ($request->isJson() && $body !== '' && json_decode($body) === null && json_last_error() !== JSON_ERROR_NONE) {
+            throw new ProviderException('The request body is not valid JSON.', 'INVALID_JSON', 400);
         }
     }
 

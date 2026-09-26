@@ -9,9 +9,7 @@ use Illuminate\Validation\Rule;
 
 final class ConnectorPayload
 {
-    public function __construct(private ConnectorConfiguration $configuration)
-    {
-    }
+    public function __construct(private ConnectorConfiguration $configuration) {}
 
     /** @return array<string, mixed> */
     public function from(Request $request, ?Connector $connector = null): array
@@ -29,6 +27,7 @@ final class ConnectorPayload
             'input_schema.*.type' => ['required', 'string'],
             'input_schema.*.required' => ['required', 'boolean'],
             'input_schema.*.description' => ['nullable', 'string', 'max:500'],
+            'input_schema.*.example' => ['nullable', 'string', 'max:2000'],
             'output_schema' => ['required', 'array'],
             'auth_mode' => ['required', Rule::in(['api_key', 'none'])],
             'status' => ['required', Rule::in(['draft', 'active', 'disabled'])],

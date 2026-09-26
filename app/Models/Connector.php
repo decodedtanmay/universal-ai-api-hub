@@ -23,4 +23,9 @@ class Connector extends Model
     {
         return $this->hasMany(ExecutionLog::class);
     }
+
+    public function apiKeys()
+    {
+        return $this->hasMany(ConnectorApiKey::class);
+    }
 }

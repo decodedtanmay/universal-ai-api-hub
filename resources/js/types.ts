@@ -5,6 +5,7 @@ export type InputField = {
     type: InputType;
     required: boolean;
     description?: string;
+    example?: string;
 };
 
 export type Connector = {
@@ -28,6 +29,7 @@ export type Connector = {
 
 export type Provider = { id: string; label: string; models: string[]; supports_images: boolean };
 export type Flash = { success?: string | null };
+export type ProviderStatus = { id: string; label: string; configured: boolean };
 
 export type ExecutionLog = {
     id: number;
@@ -36,5 +38,14 @@ export type ExecutionLog = {
     duration_ms: number | null;
     total_tokens: number | null;
     error_code: string | null;
+    api_key: { name: string; prefix: string } | null;
+    created_at: string | null;
+};
+
+export type ApiKey = {
+    id: number;
+    name: string;
+    prefix: string;
+    last_used_at: string | null;
     created_at: string | null;
 };

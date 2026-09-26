@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
                 'type' => 'text',
                 'required' => true,
                 'description' => 'Article topic',
+                'example' => 'Why dark mode reduces eye strain',
             ]],
             'output_schema' => [
                 'type' => 'object',
@@ -37,6 +38,29 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
+        Connector::updateOrCreate(['slug' => 'content-rewriter'], [
+            'name' => 'Content Rewriter',
+            'description' => 'Rewrite text to follow custom instructions. Requires an API key.',
+            'provider' => 'groq',
+            'model' => 'openai/gpt-oss-20b',
+            'system_prompt' => 'You are an expert editor. Rewrite the supplied text following the supplied instructions. Keep the original meaning unless told otherwise. List the main changes you made.',
+            'input_schema' => [
+                ['name' => 'text', 'type' => 'text', 'required' => true, 'description' => 'The text to rewrite', 'example' => 'our product is really good and lots of people like it a lot, you should buy it'],
+                ['name' => 'instructions', 'type' => 'text', 'required' => true, 'description' => 'How to rewrite it', 'example' => 'Make it concise and professional'],
+            ],
+            'output_schema' => [
+                'type' => 'object',
+                'properties' => [
+                    'rewritten' => ['type' => 'string'],
+                    'changes' => ['type' => 'array', 'items' => ['type' => 'string']],
+                ],
+                'required' => ['rewritten', 'changes'],
+                'additionalProperties' => false,
+            ],
+            'auth_mode' => 'api_key',
+            'status' => 'active',
+        ]);
+
         Connector::updateOrCreate(['slug' => 'business-card-scanner'], [
             'name' => 'Business Card Scanner',
             'description' => 'Extract contact details from a business-card image.',
@@ -48,6 +72,7 @@ class DatabaseSeeder extends Seeder
                 'type' => 'image',
                 'required' => true,
                 'description' => 'Business card image in JPEG, PNG, or WebP format',
+                'example' => '/samples/business-card.png',
             ]],
             'output_schema' => [
                 'type' => 'object',
