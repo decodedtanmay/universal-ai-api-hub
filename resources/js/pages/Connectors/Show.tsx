@@ -103,8 +103,8 @@ export default function ConnectorShow({ connector, stats, recentLogs, apiKeys }:
                 <p className="page-subtitle">{connector.description || 'No description added.'}</p>
             </div>
             <div className="header-actions">
-                <Link href={`/connectors/${connector.id}/docs`} className="button button-secondary"><FileText size={15} /> API docs</Link>
-                <Link href={`/connectors/${connector.id}/edit`} className="button button-secondary"><Pencil size={15} /> Edit</Link>
+                <Link href={`/connectors/${connector.id}/docs`} className="button button-square-outline"><FileText size={15} /> API docs</Link>
+                <Link href={`/connectors/${connector.id}/edit`} className="button button-square-outline"><Pencil size={15} /> Edit</Link>
                 <button type="button" className="icon-button is-danger" onClick={() => setConfirming(true)} aria-label={`Delete ${connector.name}`} title="Delete connector"><Trash2 size={16} /></button>
             </div>
         </section>
@@ -112,7 +112,7 @@ export default function ConnectorShow({ connector, stats, recentLogs, apiKeys }:
         {!isActive && <div className="callout" role="note">
             <AlertTriangle size={18} />
             <div><strong>This connector is {connector.status}.</strong><p>The playground and the public endpoint reject requests until the status is set to active.</p></div>
-            <Link href={`/connectors/${connector.id}/edit`} className="button button-secondary button-sm">Change status</Link>
+            <Link href={`/connectors/${connector.id}/edit`} className="button button-square-outline button-sm">Change status</Link>
         </div>}
 
         <section className="two-pane">
@@ -134,11 +134,11 @@ export default function ConnectorShow({ connector, stats, recentLogs, apiKeys }:
                         </div>
                         <div className="playground-actions" style={{ marginTop: 18 }}>
                             <span className="playground-tools">
-                                {hasSamples && <button type="button" className="button button-secondary button-sm" onClick={fillSample} disabled={loadingSample}><Sparkles size={14} /> {loadingSample ? 'Loading…' : 'Use sample'}</button>}
+                                {hasSamples && <button type="button" className="button button-square-outline button-sm" onClick={fillSample} disabled={loadingSample}><Sparkles size={14} /> {loadingSample ? 'Loading…' : 'Use sample'}</button>}
                                 <CopyButton value={curl} label="Copy as cURL" showLabel icon={<Terminal size={14} />} />
                                 <span className="muted kbd-hint"><kbd>⌘</kbd> <kbd>↵</kbd> to run</span>
                             </span>
-                            <button type="submit" className="button button-primary" disabled={testing || !isActive}>{testing ? <><span className="spinner" /> Running…</> : <><Play size={15} /> Run test</>}</button>
+                            <button type="submit" className="button button-teal" disabled={testing || !isActive}>{testing ? <><span className="spinner" /> Running…</> : <><Play size={15} /> Run test</>}</button>
                         </div>
                         {testing && <div className="running" aria-live="polite"><span className="spinner" /><div className="shimmer"><span /><span /></div><span>Waiting for {connector.provider}…</span></div>}
                         {result && !testing && <TestResult result={result} elapsed={elapsed} />}

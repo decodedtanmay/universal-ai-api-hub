@@ -256,7 +256,7 @@ export default function ConnectorForm({ connector, providers, existingSlugs = []
                     <div className="save-bar-actions">
                         <span className="muted kbd-hint"><kbd>⌘</kbd> <kbd>S</kbd></span>
                         <Link href={backHref} className="button button-ghost">Cancel</Link>
-                        <button type="submit" className="button button-primary" disabled={form.processing}>{form.processing ? <><span className="spinner" /> Saving…</> : connector ? 'Save changes' : 'Create connector'}</button>
+                        <button type="submit" className="button button-teal" disabled={form.processing}>{form.processing ? <><span className="spinner" /> Saving…</> : connector ? 'Save changes' : 'Create connector'}</button>
                     </div>
                 </div>
             </div>

@@ -56,7 +56,7 @@ export default function ConnectorDocumentation({ connector, limits }: Props) {
                 <h1>{connector.name}</h1>
                 <p className="page-subtitle">{connector.description || 'Generated from this connector configuration.'}</p>
             </div>
-            <div className="header-actions"><Link href={`/connectors/${connector.id}`} className="button button-secondary"><Play size={15} /> Open playground</Link></div>
+            <div className="header-actions"><Link href={`/connectors/${connector.id}`} className="button button-teal"><Play size={15} /> Open playground</Link></div>
         </section>
 
         <div className="docs">
