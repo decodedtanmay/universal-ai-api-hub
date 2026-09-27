@@ -34,7 +34,8 @@ COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-ai-hub.ini
 COPY docker/start.sh /usr/local/bin/start-app
 
-RUN chmod +x /usr/local/bin/start-app \
+RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache \
+    && chmod +x /usr/local/bin/start-app \
     && chown -R www-data:www-data storage bootstrap/cache
 
 CMD ["/usr/local/bin/start-app"]
