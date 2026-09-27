@@ -90,5 +90,76 @@ class DatabaseSeeder extends Seeder
             'auth_mode' => 'none',
             'status' => 'active',
         ]);
+
+        Connector::updateOrCreate(['slug' => 'invoice-scanner'], [
+            'name' => 'Invoice Scanner',
+            'description' => 'Extract vendor, totals and dates from an invoice image.',
+            'provider' => 'gemini',
+            'model' => 'gemini-3.6-flash',
+            'system_prompt' => 'You are an invoice extraction system. Read the supplied invoice image and extract the vendor name, invoice number, invoice date, due date, currency, subtotal, tax and total. Amounts must be numbers without thousands separators. Use an empty string for missing text values and 0 for missing amounts. Return only valid JSON matching the configured output structure.',
+            'input_schema' => [[
+                'name' => 'invoice_image',
+                'type' => 'image',
+                'required' => true,
+                'description' => 'Invoice photo or scan (JPEG, PNG or WebP)',
+                'example' => '/samples/invoice.png',
+            ]],
+            'output_schema' => [
+                'type' => 'object',
+                'properties' => [
+                    'vendor' => ['type' => 'string'],
+                    'invoice_number' => ['type' => 'string'],
+                    'invoice_date' => ['type' => 'string'],
+                    'due_date' => ['type' => 'string'],
+                    'currency' => ['type' => 'string'],
+                    'subtotal' => ['type' => 'number'],
+                    'tax' => ['type' => 'number'],
+                    'total' => ['type' => 'number'],
+                ],
+                'required' => ['vendor', 'invoice_number', 'invoice_date', 'due_date', 'currency', 'subtotal', 'tax', 'total'],
+                'additionalProperties' => false,
+            ],
+            'auth_mode' => 'none',
+            'status' => 'active',
+        ]);
+
+        Connector::updateOrCreate(['slug' => 'support-ticket-classifier'], [
+            'name' => 'Support Ticket Classifier',
+            'description' => 'Analyze customer support tickets for category, priority, sentiment, and recommended action.',
+            'provider' => 'groq',
+            'model' => 'openai/gpt-oss-20b',
+            'system_prompt' => 'You are a customer operations AI. Analyze the support ticket and classify the category, urgency (low, medium, high, critical), sentiment (positive, neutral, negative), key issues identified, and draft a polite, actionable response.',
+            'input_schema' => [
+                [
+                    'name' => 'ticket_text',
+                    'type' => 'text',
+                    'required' => true,
+                    'description' => 'Customer message or ticket description',
+                    'example' => 'I was charged twice for my subscription this morning ($49 x 2). Please refund the extra charge immediately as my bank account is in overdraft.',
+                ],
+                [
+                    'name' => 'customer_tier',
+                    'type' => 'text',
+                    'required' => false,
+                    'description' => 'Customer plan tier (standard, pro, enterprise)',
+                    'example' => 'enterprise',
+                ],
+            ],
+            'output_schema' => [
+                'type' => 'object',
+                'properties' => [
+                    'category' => ['type' => 'string'],
+                    'urgency' => ['type' => 'string'],
+                    'sentiment' => ['type' => 'string'],
+                    'summary' => ['type' => 'string'],
+                    'key_issues' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'suggested_reply' => ['type' => 'string'],
+                ],
+                'required' => ['category', 'urgency', 'sentiment', 'summary', 'key_issues', 'suggested_reply'],
+                'additionalProperties' => false,
+            ],
+            'auth_mode' => 'none',
+            'status' => 'active',
+        ]);
     }
 }

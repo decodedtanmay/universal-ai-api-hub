@@ -8,11 +8,11 @@ No code and no redeploy is needed to add an endpoint. A new connector is a datab
 
 | | |
 | --- | --- |
-| **Live application** | `<LIVE_URL>` |
-| **Dashboard** | `<LIVE_URL>/connectors` |
-| **API documentation** | `<LIVE_URL>/connectors/{id}/docs` (linked from every connector) |
-| **Health check** | `<LIVE_URL>/health` |
-| **Demo endpoints** | `POST <LIVE_URL>/api/connectors/business-card-scanner`, `…/article-writer` (both public) and `…/content-rewriter` (requires an API key) |
+| **Live application** | `https://universal-ai-api-hub-mw42.onrender.com` |
+| **Dashboard** | `https://universal-ai-api-hub-mw42.onrender.com/connectors` |
+| **API documentation** | `https://universal-ai-api-hub-mw42.onrender.com/connectors/{id}/docs` (linked from every connector) |
+| **Health check** | `https://universal-ai-api-hub-mw42.onrender.com/health` |
+| **Demo endpoints** | `POST https://universal-ai-api-hub-mw42.onrender.com/api/connectors/business-card-scanner`, `…/article-writer` (both public) and `…/content-rewriter` (requires an API key) |
 
 No account or login is needed to open the application.
 
@@ -21,10 +21,12 @@ No account or login is needed to open the application.
 | Connector | Processing | Provider / model | Input | Output |
 | --- | --- | --- | --- | --- |
 | **Business Card Scanner** | Image, vision | Google Gemini, `gemini-3.6-flash` | `card_image` (JPEG, PNG or WebP, up to 4 MB) | `name`, `company`, `designation`, `phone`, `email`, `website` |
+| **Invoice Scanner** | Image, vision | Google Gemini, `gemini-3.6-flash` | `invoice_image` (JPEG, PNG or WebP, up to 4 MB) | `vendor`, `invoice_number`, `invoice_date`, `due_date`, `currency`, `subtotal`, `tax`, `total` |
 | **Article Writer** | Text | Groq, `openai/gpt-oss-20b` | `topic` (text) | `title`, `body` |
 | **Content Rewriter** | Text, API key required | Groq, `openai/gpt-oss-20b` | `text`, `instructions` | `rewritten`, `changes[]` |
+| **Support Ticket Classifier** | Text, classification | Groq, `openai/gpt-oss-20b` | `ticket_text`, `customer_tier` | `category`, `urgency`, `sentiment`, `summary`, `key_issues[]`, `suggested_reply` |
 
-All three are re-created on every boot by the seeder (`database/seeders/DatabaseSeeder.php`), so the demos always exist even after a database reset.
+All five are re-created on every boot by the seeder (`database/seeders/DatabaseSeeder.php`), so the demos always exist even after a database reset.
 
 ### Try it in 30 seconds
 
@@ -35,7 +37,7 @@ All three are re-created on every boot by the seeder (`database/seeders/Database
 5. Open **Content Rewriter**, click **New key** under *API keys*, and copy the key (it is shown once). Call the endpoint with and without it:
 
 ```bash
-curl -X POST '<LIVE_URL>/api/connectors/content-rewriter' \
+curl -X POST 'https://universal-ai-api-hub-mw42.onrender.com/api/connectors/content-rewriter' \
   -H 'Authorization: Bearer <the key>' \
   -H 'Content-Type: application/json' \
   -d '{"text": "our product is really good, you should buy it", "instructions": "Make it professional"}'
@@ -50,7 +52,7 @@ Other connectors offer the same **Use sample** button when their fields have exa
 ### Business Card Scanner (image input, Gemini)
 
 ```bash
-curl -X POST '<LIVE_URL>/api/connectors/business-card-scanner' \
+curl -X POST 'https://universal-ai-api-hub-mw42.onrender.com/api/connectors/business-card-scanner' \
   -H 'Accept: application/json' \
   -F 'card_image=@business-card.png'
 ```
@@ -81,7 +83,7 @@ A ready-made test image is at [`public/samples/business-card.png`](public/sample
 ### Article Writer (text input, Groq)
 
 ```bash
-curl -X POST '<LIVE_URL>/api/connectors/article-writer' \
+curl -X POST 'https://universal-ai-api-hub-mw42.onrender.com/api/connectors/article-writer' \
   -H 'Content-Type: application/json' \
   -d '{"topic": "Tea vs coffee"}'
 ```

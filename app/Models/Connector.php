@@ -28,4 +28,9 @@ class Connector extends Model
     {
         return $this->hasMany(ConnectorApiKey::class);
     }
+
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        return $this->where($field ?? (is_numeric($value) ? 'id' : 'slug'), $value)->firstOrFail();
+    }
 }
