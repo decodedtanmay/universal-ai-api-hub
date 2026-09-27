@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { BookOpen, ChevronLeft, FileCode2, Globe, KeyRound, Play } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { AppShell } from '../../components/AppShell';
+import BlurText from '../../components/reactbits/BlurText';
 import { useScrollSpy } from '../../components/useScrollSpy';
 import { ProviderBadge } from '../../components/Badges';
 import { CodeBlock } from '../../components/CodeBlock';
@@ -53,10 +54,10 @@ export default function ConnectorDocumentation({ connector, limits }: Props) {
             <div>
                 <Link href={`/connectors/${connector.id}`} className="back-link"><ChevronLeft size={15} /> {connector.name}</Link>
                 <p className="eyebrow"><BookOpen size={13} /> API reference</p>
-                <h1>{connector.name}</h1>
+                <h1><BlurText key={connector.id} text={connector.name} delay={60} direction="bottom" /></h1>
                 <p className="page-subtitle">{connector.description || 'Generated from this connector configuration.'}</p>
             </div>
-            <div className="header-actions"><Link href={`/connectors/${connector.id}`} className="button button-teal"><Play size={15} /> Open playground</Link></div>
+            <div className="header-actions"><Link href={`/connectors/${connector.id}`} className="button button-secondary"><Play size={15} /> Open playground</Link></div>
         </section>
 
         <div className="docs">

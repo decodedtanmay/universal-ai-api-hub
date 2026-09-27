@@ -62,7 +62,7 @@ export function ApiKeysCard({ connectorId, endpoint, keys, onIssued }: Props) {
     return <div className="card" id="api-keys">
         <div className="card-header">
             <div><div className="card-title"><KeyRound size={16} /><h2>API keys</h2></div><p>Scoped to this connector. Stored as SHA-256 hashes, so each key is shown only once.</p></div>
-            {!creating && <button type="button" className="button button-square-outline button-sm" onClick={() => { setCreating(true); setIssued(null); }}><Plus size={14} /> New key</button>}
+            {!creating && <button type="button" className="button button-secondary button-sm" onClick={() => { setCreating(true); setIssued(null); }}><Plus size={14} /> New key</button>}
         </div>
 
         {issued && <div className="key-reveal" role="status">
@@ -78,7 +78,7 @@ export function ApiKeysCard({ connectorId, endpoint, keys, onIssued }: Props) {
                 <input className="input" autoFocus value={name} maxLength={60} onChange={(event) => setName(event.target.value)} placeholder="Key name, for example “Mobile app” or “Evaluator”" />
             </label>
             <button type="button" className="button button-ghost" onClick={() => { setCreating(false); setError(null); }}>Cancel</button>
-            <button type="submit" className="button button-teal" disabled={saving}>{saving ? <><span className="spinner" /> Creating…</> : 'Create key'}</button>
+            <button type="submit" className="button button-primary" disabled={saving}>{saving ? <><span className="spinner" /> Creating…</> : 'Create key'}</button>
             {error && <p className="field-error" style={{ flexBasis: '100%' }}>{error}</p>}
         </form>}
 

@@ -3,6 +3,7 @@ import { AlertTriangle, BarChart3, CheckCircle2, ChevronDown, ChevronLeft, Clock
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { ApiKeysCard } from '../../components/ApiKeysCard';
 import { AppShell } from '../../components/AppShell';
+import BlurText from '../../components/reactbits/BlurText';
 import { ProviderBadge, StatusBadge } from '../../components/Badges';
 import { CodeBlock, highlightJson } from '../../components/CodeBlock';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -99,12 +100,12 @@ export default function ConnectorShow({ connector, stats, recentLogs, apiKeys }:
         <section className="page-header">
             <div>
                 <Link href="/connectors" className="back-link"><ChevronLeft size={15} /> Connectors</Link>
-                <div className="title-row"><h1>{connector.name}</h1><StatusBadge status={connector.status} /></div>
+                <div className="title-row"><h1><BlurText key={connector.id} text={connector.name} delay={60} direction="bottom" /></h1><StatusBadge status={connector.status} /></div>
                 <p className="page-subtitle">{connector.description || 'No description added.'}</p>
             </div>
             <div className="header-actions">
-                <Link href={`/connectors/${connector.id}/docs`} className="button button-square-outline"><FileText size={15} /> API docs</Link>
-                <Link href={`/connectors/${connector.id}/edit`} className="button button-square-outline"><Pencil size={15} /> Edit</Link>
+                <Link href={`/connectors/${connector.id}/docs`} className="button button-secondary"><FileText size={15} /> API docs</Link>
+                <Link href={`/connectors/${connector.id}/edit`} className="button button-secondary"><Pencil size={15} /> Edit</Link>
                 <button type="button" className="icon-button is-danger" onClick={() => setConfirming(true)} aria-label={`Delete ${connector.name}`} title="Delete connector"><Trash2 size={16} /></button>
             </div>
         </section>
@@ -112,7 +113,7 @@ export default function ConnectorShow({ connector, stats, recentLogs, apiKeys }:
         {!isActive && <div className="callout" role="note">
             <AlertTriangle size={18} />
             <div><strong>This connector is {connector.status}.</strong><p>The playground and the public endpoint reject requests until the status is set to active.</p></div>
-            <Link href={`/connectors/${connector.id}/edit`} className="button button-square-outline button-sm">Change status</Link>
+            <Link href={`/connectors/${connector.id}/edit`} className="button button-secondary button-sm">Change status</Link>
         </div>}
 
         <section className="two-pane">
@@ -134,11 +135,11 @@ export default function ConnectorShow({ connector, stats, recentLogs, apiKeys }:
                         </div>
                         <div className="playground-actions" style={{ marginTop: 18 }}>
                             <span className="playground-tools">
-                                {hasSamples && <button type="button" className="button button-square-outline button-sm" onClick={fillSample} disabled={loadingSample}><Sparkles size={14} /> {loadingSample ? 'Loading…' : 'Use sample'}</button>}
+                                {hasSamples && <button type="button" className="button button-secondary button-sm" onClick={fillSample} disabled={loadingSample}><Sparkles size={14} /> {loadingSample ? 'Loading…' : 'Use sample'}</button>}
                                 <CopyButton value={curl} label="Copy as cURL" showLabel icon={<Terminal size={14} />} />
                                 <span className="muted kbd-hint"><kbd>⌘</kbd> <kbd>↵</kbd> to run</span>
                             </span>
-                            <button type="submit" className="button button-teal" disabled={testing || !isActive}>{testing ? <><span className="spinner" /> Running…</> : <><Play size={15} /> Run test</>}</button>
+                            <button type="submit" className="button button-primary" disabled={testing || !isActive}>{testing ? <><span className="spinner" /> Running…</> : <><Play size={15} /> Run test</>}</button>
                         </div>
                         {testing && <div className="running" aria-live="polite"><span className="spinner" /><div className="shimmer"><span /><span /></div><span>Waiting for {connector.provider}…</span></div>}
                         {result && !testing && <TestResult result={result} elapsed={elapsed} />}
@@ -290,7 +291,7 @@ function FileDrop({ field, file, onFile }: { field: InputField; file: File | nul
         <input ref={input} type="file" aria-label={`Upload ${field.name}`} accept={isImage ? 'image/jpeg,image/png,image/webp' : '.txt,.json,text/plain,application/json'} onChange={(event) => onFile(event.target.files?.[0] || null)} />
         <span className="dropzone-icon">{preview ? <img src={preview} alt="" /> : isImage ? <ImageIcon size={18} /> : <FileUp size={18} />}</span>
         <span style={{ minWidth: 0 }}>
-            <strong>{file ? file.name : <>Drop a {isImage ? 'image' : 'file'} or <span style={{ color: 'var(--accent-text)' }}>browse</span></>}</strong>
+            <strong>{file ? file.name : <>Drop {isImage ? 'an image' : 'a file'} or <span style={{ color: 'var(--accent-text)' }}>browse</span></>}</strong>
             <small>{file ? formatBytes(file.size) : isImage ? 'JPEG, PNG or WebP, up to 4 MB' : 'TXT or JSON, up to 4 MB'}</small>
         </span>
         {file && <button type="button" className="icon-button" onClick={clear} aria-label={`Remove ${file.name}`}><X size={15} /></button>}    </div>;

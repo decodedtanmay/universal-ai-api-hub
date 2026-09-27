@@ -34,15 +34,13 @@ export function RequestAnatomy({ connector }: { connector: Connector | null }) {
             <span className="anatomy-dots" aria-hidden="true"><i /><i /><i /></span>
             <span className="anatomy-title"><span className="method">POST</span>/api/connectors/{slug}</span>
         </div>
-        <div className="anatomy-terminal">
-            <ol className="anatomy-steps">
-                {steps.map((step, index) => <li key={step.label} style={{ animationDelay: `${0.25 + index * 0.22}s` }}>
-                    <span className="anatomy-check"><Check size={11} strokeWidth={3} /></span>
-                    <span className="anatomy-label">{step.label}</span>
-                    <span className="anatomy-detail">{step.detail}</span>
-                </li>)}
-            </ol>
-            <pre className="anatomy-response" style={{ animationDelay: '1.45s' }}>{highlightJson(response)}</pre>
-        </div>
+        <ol className="anatomy-steps">
+            {steps.map((step, index) => <li key={step.label} style={{ animationDelay: `${0.25 + index * 0.22}s` }}>
+                <span className="anatomy-check"><Check size={11} strokeWidth={3} /></span>
+                <span className="anatomy-label">{step.label}</span>
+                <span className="anatomy-detail">{step.detail}</span>
+            </li>)}
+        </ol>
+        <pre className="anatomy-response" style={{ animationDelay: '1.45s' }}>{highlightJson(response)}</pre>
     </div>;
 }
