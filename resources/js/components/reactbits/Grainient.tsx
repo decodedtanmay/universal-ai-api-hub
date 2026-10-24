@@ -183,7 +183,7 @@ const Grainient: React.FC<GrainientProps> = ({
       webgl: 2,
       alpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
+      dpr: Math.min(window.devicePixelRatio || 1, 1)
     });
 
     const gl = renderer.gl;
@@ -247,11 +247,14 @@ const Grainient: React.FC<GrainientProps> = ({
     let isVisible = true;
     let isPageVisible = !document.hidden;
     const t0 = performance.now();
+    let lastFrame = 0;
 
     const loop = (t: number) => {
+      raf = requestAnimationFrame(loop);
+      if (t - lastFrame < 1000 / 30) return;
+      lastFrame = t;
       (program.uniforms.iTime as { value: number }).value = (t - t0) * 0.001;
       renderer.render({ scene: mesh });
-      raf = requestAnimationFrame(loop);
     };
 
     const tryStart = () => {

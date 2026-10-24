@@ -2,7 +2,6 @@ import { Link, usePage } from '@inertiajs/react';
 import { Blocks, CheckCircle2, Moon, Plus, Sun, X } from 'lucide-react';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import type { Flash, ProviderStatus } from '../types';
-import GlassSurface from './reactbits/GlassSurface';
 import { MotionConfig } from 'motion/react';
 
 type Theme = 'light' | 'dark';
@@ -32,7 +31,7 @@ export function AppShell({ children }: PropsWithChildren) {
     return <MotionConfig reducedMotion="user"><div className="app-shell">
         <header className="topbar">
             <div className="topbar-inner">
-                <GlassSurface className="topbar-glass" width="100%" height={64} borderRadius={20} blur={10} brightness={theme === 'dark' ? 35 : 70} opacity={0.9} backgroundOpacity={theme === 'dark' ? 0.32 : 0.42} distortionScale={-60} redOffset={0} greenOffset={1} blueOffset={2} saturation={1.4}>
+                <div className="topbar-glass">
                     <div className="topbar-row">
                         <Link href="/connectors" className="brand" aria-label="Universal AI API Hub home">
                             <span className="brand-mark"><Blocks size={17} /></span>
@@ -46,7 +45,7 @@ export function AppShell({ children }: PropsWithChildren) {
                             <Link href="/connectors/create" className="button button-primary button-sm"><Plus size={15} /><span className="nav-link-label">New connector</span></Link>
                         </nav>
                     </div>
-                </GlassSurface>
+                </div>
             </div>
         </header>
         <main className="container">{children}</main>

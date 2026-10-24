@@ -1,10 +1,10 @@
 /**
  * Hyperspeed, from the React Bits registry (https://reactbits.dev).
  * Local changes: hold-to-accelerate listens on the window (the effect lives in a pointer-events: none background)
- * and ignores presses on interactive or content elements; the right-click blocker is removed; renders at 1x pixel
- * ratio (the bloomed trails look the same, at a quarter of the pixel cost on Retina) and skips frames while the tab is hidden.
+ * and ignores presses on interactive or content elements. Background rendering uses a reduced pixel budget,
+ * half-resolution bloom and a 30fps limit to leave time for scrolling and form input.
  */
-import { BloomEffect, EffectComposer, EffectPass, RenderPass, SMAAEffect, SMAAPreset } from 'postprocessing';
+import { BloomEffect, EffectComposer, EffectPass, RenderPass } from 'postprocessing';
 import { type FC, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
@@ -919,7 +919,8 @@ function resizeRendererToDisplaySize(
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
   if (width <= 0 || height <= 0) return false;
-  const needResize = canvas.width !== width || canvas.height !== height;
+  const pixelRatio = renderer.getPixelRatio();
+  const needResize = canvas.width !== Math.floor(width * pixelRatio) || canvas.height !== Math.floor(height * pixelRatio);
   if (needResize) {
     setSize(width, height, false);
   }
@@ -936,7 +937,6 @@ class App {
   renderPass!: RenderPass;
   bloomPass!: EffectPass;
   timer: THREE.Timer;
-  assets: Record<string, any>;
   disposed: boolean;
   road: Road;
   leftCarLights: CarLights;
@@ -948,6 +948,8 @@ class App {
   speedUp: number;
   timeOffset: number;
   hasValidSize: boolean;
+  frameId = 0;
+  lastFrameTime = 0;
 
   constructor(container: HTMLElement, options: HyperspeedOptions) {
     this.options = options;
@@ -968,7 +970,7 @@ class App {
       alpha: true
     });
     this.renderer.setSize(initW, initH, false);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 0.7));
 
     this.composer = new EffectComposer(this.renderer);
     container.appendChild(this.renderer.domElement);
@@ -992,7 +994,6 @@ class App {
 
     this.timer = new THREE.Timer();
     this.timer.connect(document);
-    this.assets = {};
     this.disposed = false;
 
     this.road = new Road(this, options);
@@ -1058,50 +1059,15 @@ class App {
       new BloomEffect({
         luminanceThreshold: 0.2,
         luminanceSmoothing: 0,
-        resolutionScale: 1
+        resolutionScale: 0.5
       })
     );
 
-    const smaaPass = new EffectPass(
-      this.camera,
-      new SMAAEffect({
-        preset: SMAAPreset.MEDIUM
-      })
-    );
     this.renderPass.renderToScreen = false;
-    this.bloomPass.renderToScreen = false;
-    smaaPass.renderToScreen = true;
+    this.bloomPass.renderToScreen = true;
 
     this.composer.addPass(this.renderPass);
     this.composer.addPass(this.bloomPass);
-    this.composer.addPass(smaaPass);
-  }
-
-  loadAssets(): Promise<void> {
-    const assets = this.assets;
-    return new Promise(resolve => {
-      const manager = new THREE.LoadingManager(resolve);
-
-      const searchImage = new Image();
-      const areaImage = new Image();
-      assets.smaa = {};
-
-      searchImage.addEventListener('load', function () {
-        assets.smaa.search = this;
-        manager.itemEnd('smaa-search');
-      });
-
-      areaImage.addEventListener('load', function () {
-        assets.smaa.area = this;
-        manager.itemEnd('smaa-area');
-      });
-
-      manager.itemStart('smaa-search');
-      manager.itemStart('smaa-area');
-
-      searchImage.src = SMAAEffect.searchImageDataURL;
-      areaImage.src = SMAAEffect.areaImageDataURL;
-    });
   }
 
   init() {
@@ -1199,6 +1165,7 @@ class App {
 
   dispose() {
     this.disposed = true;
+    cancelAnimationFrame(this.frameId);
     this.timer.dispose();
 
     if (this.scene) {
@@ -1244,13 +1211,14 @@ class App {
     this.composer.setSize(width, height, updateStyles);
   }
 
-  tick() {
+  tick(timestamp = 0) {
     if (this.disposed) return;
 
-    if (document.hidden) {
-      requestAnimationFrame(this.tick);
+    this.frameId = requestAnimationFrame(this.tick);
+    if (document.hidden || timestamp - this.lastFrameTime < 1000 / 30) {
       return;
     }
+    this.lastFrameTime = timestamp;
 
     if (!this.hasValidSize) {
       const w = this.container.offsetWidth;
@@ -1263,7 +1231,6 @@ class App {
         this.hasValidSize = true;
         this.timer.reset();
       } else {
-        requestAnimationFrame(this.tick);
         return;
       }
     }
@@ -1279,11 +1246,9 @@ class App {
     if (this.hasValidSize) {
       this.timer.update();
       const delta = this.timer.getDelta();
-      this.render(delta);
       this.update(delta);
+      this.render(delta);
     }
-
-    requestAnimationFrame(this.tick);
   }
 }
 
@@ -1319,7 +1284,7 @@ const Hyperspeed: FC<HyperspeedProps> = ({ effectOptions = DEFAULT_EFFECT_OPTION
 
     const myApp = new App(container, options);
     appRef.current = myApp;
-    myApp.loadAssets().then(myApp.init);
+    myApp.init();
 
     return () => {
       if (appRef.current) {

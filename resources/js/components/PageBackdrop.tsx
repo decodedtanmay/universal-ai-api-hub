@@ -1,13 +1,14 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import Grainient from './reactbits/Grainient';
 import { usePrefersReducedMotion, useTheme } from './useTheme';
 
 const HyperspeedBackdrop = lazy(() => import('./HyperspeedBackdrop'));
+const Grainient = lazy(() => import('./reactbits/Grainient'));
 
 /**
  * Animated background fixed behind every page.
  * Dark theme: the React Bits Hyperspeed light-trail road in violet (three.js, loaded lazily).
- * Light theme, reduced motion, or `?bg=grainient`: a slow, grainy violet gradient (React Bits Grainient).
+ * Light theme or `?bg=grainient`: a slow, grainy violet gradient (React Bits Grainient).
+ * Reduced-motion visitors get a static background without a WebGL context.
  */
 export function PageBackdrop() {
     const theme = useTheme();
@@ -27,25 +28,29 @@ export function PageBackdrop() {
         return () => clearTimeout(timer);
     }, []);
 
-    if (dark && !reducedMotion && !preferGradient) {
+    if (reducedMotion) {
+        return <div className={`page-backdrop is-${theme}`} style={{ background: 'var(--bg)' }} aria-hidden="true" />;
+    }
+
+    if (dark && !preferGradient) {
         return <div className="page-backdrop is-dark is-hyperspeed" aria-hidden="true">
             {idle && <Suspense fallback={null}><HyperspeedBackdrop /></Suspense>}
         </div>;
     }
 
     return <div className={`page-backdrop is-${theme}`} aria-hidden="true">
-        <Grainient
+        {idle && <Suspense fallback={null}><Grainient
             key={theme}
             color1={dark ? '#150d2a' : '#ede9fe'}
             color2={dark ? '#6d28d9' : '#8b5cf6'}
             color3={dark ? '#16131f' : '#f4f3f8'}
-            timeSpeed={reducedMotion ? 0 : 0.2}
+            timeSpeed={0.2}
             warpStrength={1}
             grainAmount={dark ? 0.06 : 0.04}
-            grainAnimated={!reducedMotion}
+            grainAnimated
             contrast={1.1}
             saturation={dark ? 1 : 0.8}
             lightMode={!dark}
-        />
+        /></Suspense>}
     </div>;
 }
